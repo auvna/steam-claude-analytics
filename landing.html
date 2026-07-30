@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steam Claude Analytics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0a0a0f; color: #e0e0e0; font-family: 'Inter', 'Segoe UI', sans-serif; min-height: 100vh; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at top, #0d1f3c 0%, #0a0a0f 60%); z-index: -1; }
+
+        .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: rgba(27, 40, 56, 0.8); border-bottom: 1px solid #2a4a6b; backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100; }
+        .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .nav-logo { font-size: 1.5rem; filter: drop-shadow(0 0 8px rgba(102, 192, 244, 0.6)); }
+        .nav-title { color: #66c0f4; font-size: 1.25rem; font-weight: 600; letter-spacing: -0.3px; }
+        .nav-btn { background: linear-gradient(135deg, #1b8bed, #1470c4); color: white; border: none; padding: 0.6rem 1.25rem; border-radius: 6px; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; font-weight: 500; text-decoration: none; display: inline-block; }
+        .nav-btn:hover { background: linear-gradient(135deg, #2a9fff, #1b8bed); transform: translateY(-1px); box-shadow: 0 4px 15px rgba(27, 139, 237, 0.4); }
+
+        .page { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+        .hero { padding: 4rem 0 2rem; border-bottom: 1px solid #2a4a6b; margin-bottom: 3rem; }
+        .hero-eyebrow { color: #66c0f4; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-bottom: 1rem; }
+        .hero-title { font-size: 3rem; font-weight: 700; color: #ffffff; line-height: 1.1; letter-spacing: -1px; margin-bottom: 1rem; }
+        .hero-title span { color: #66c0f4; }
+        .hero-summary { color: #a0b8cc; font-size: 1.05rem; line-height: 1.7; max-width: 700px; min-height: 3rem; margin-bottom: 1.5rem; }
+        .hero-summary.loading { background: linear-gradient(90deg, #1b2838 25%, #243447 50%, #1b2838 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; height: 4rem; }
+
+        .marquee-wrap { width: 100vw; margin-left: calc(-50vw + 50%); overflow: hidden; padding: 1.5rem 0; mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%); -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%); margin-bottom: 0; }
+        .marquee-track { display: flex; gap: 0.75rem; width: max-content; animation: marquee 40s linear infinite; }
+        .marquee-track:hover { animation-play-state: paused; }
+        .marquee-img { width: 180px; height: 84px; object-fit: cover; border-radius: 6px; border: 1px solid #2a4a6b; flex-shrink: 0; transition: border-color 0.2s ease, transform 0.2s ease; }
+        .marquee-img:hover { border-color: #66c0f4; transform: scale(1.03); }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        .live-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 3rem; }
+        .live-stat-box { background: linear-gradient(145deg, #1b2838, #162330); border: 1px solid #2a4a6b; border-radius: 10px; padding: 1.25rem 1.5rem; text-align: center; }
+        .live-stat-value { color: #66c0f4; font-size: 2rem; font-weight: 700; line-height: 1; margin-bottom: 0.3rem; }
+        .live-stat-label { color: #8b8b8b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .section { margin-bottom: 3rem; }
+        .section-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 1px solid #2a4a6b; }
+        .section-title { color: #ffffff; font-size: 1.1rem; font-weight: 600; }
+        .section-insight { color: #8b8b8b; font-size: 0.8rem; font-style: italic; max-width: 500px; text-align: right; }
+        .section-label { color: #66c0f4; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 0.25rem; }
+
+        .moment-card { background: linear-gradient(135deg, #0d1f3c 0%, #1b2838 50%, #162330 100%); border: 1px solid #2a4a6b; border-radius: 12px; overflow: hidden; display: flex; gap: 0; min-height: 180px; position: relative; }
+        .moment-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(ellipse at top left, rgba(102,192,244,0.06) 0%, transparent 60%); pointer-events: none; }
+        .moment-cover-wrap { flex-shrink: 0; width: 280px; position: relative; overflow: hidden; }
+        .moment-cover { width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(0.8); }
+        .moment-cover-fade { position: absolute; top: 0; right: 0; bottom: 0; width: 80px; background: linear-gradient(to right, transparent, #162330); }
+        .moment-content { flex: 1; padding: 1.75rem; display: flex; flex-direction: column; justify-content: center; }
+        .moment-eyebrow { color: #66c0f4; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; margin-bottom: 0.5rem; }
+        .moment-name { color: #ffffff; font-size: 1.6rem; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 0.75rem; line-height: 1.1; }
+        .moment-why { color: #a0b8cc; font-size: 0.875rem; line-height: 1.7; margin-bottom: 0.75rem; }
+        .moment-best { color: #8b8b8b; font-size: 0.8rem; font-style: italic; }
+        .moment-skeleton { background: linear-gradient(145deg, #1b2838, #162330); border: 1px solid #2a4a6b; border-radius: 12px; height: 180px; }
+
+        .trending-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+        .trending-card { background: linear-gradient(145deg, #1b2838, #162330); border: 1px solid #2a4a6b; border-radius: 10px; overflow: hidden; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
+        .trending-card:hover { transform: translateY(-4px); border-color: #66c0f4; box-shadow: 0 8px 25px rgba(102,192,244,0.15); }
+        .trending-cover { width: 100%; height: 85px; object-fit: cover; display: block; }
+        .trending-info { padding: 0.75rem; }
+        .trending-rank { display: inline-block; font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 4px; margin-bottom: 5px; letter-spacing: 0.5px; }
+        .trending-rank.gold { background: rgba(255, 196, 0, 0.15); color: #ffc400; border: 1px solid rgba(255, 196, 0, 0.3); }
+        .trending-rank.silver { background: rgba(192, 192, 192, 0.15); color: #c0c0c0; border: 1px solid rgba(192, 192, 192, 0.3); }
+        .trending-rank.bronze { background: rgba(205, 127, 50, 0.15); color: #cd7f32; border: 1px solid rgba(205, 127, 50, 0.3); }
+        .trending-rank.default { background: rgba(102,192,244,0.12); color: #66c0f4; border: 1px solid rgba(102,192,244,0.2); }
+        .trending-name { color: #e0e0e0; font-size: 0.82rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+        .trending-meta { color: #8b8b8b; font-size: 0.72rem; }
+
+        .top-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+        .top-card { background: linear-gradient(145deg, #1b2838, #162330); border: 1px solid #2a4a6b; border-radius: 8px; overflow: hidden; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem; transition: border-color 0.2s ease; }
+        .top-card:hover { border-color: #66c0f4; }
+        .top-cover { width: 72px; height: 34px; object-fit: cover; border-radius: 3px; flex-shrink: 0; }
+        .top-name { color: #e0e0e0; font-size: 0.82rem; font-weight: 500; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .top-owners { color: #8b8b8b; font-size: 0.72rem; }
+        .top-num { color: #2a4a6b; font-size: 1.1rem; font-weight: 700; flex-shrink: 0; width: 24px; text-align: center; }
+
+        .gems-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+        .gem-card { background: linear-gradient(145deg, #1b2838, #162330); border: 1px solid #2a4a6b; border-radius: 10px; overflow: hidden; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
+        .gem-card:hover { transform: translateY(-4px); border-color: #1D9E75; box-shadow: 0 8px 25px rgba(29,158,117,0.15); }
+        .gem-cover { width: 100%; height: 85px; object-fit: cover; display: block; }
+        .gem-info { padding: 0.75rem; }
+        .gem-name { color: #e0e0e0; font-size: 0.82rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+        .gem-badge { display: inline-block; background: rgba(29,158,117,0.15); color: #1D9E75; font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(29,158,117,0.3); margin-bottom: 4px; }
+        .gem-owners { color: #8b8b8b; font-size: 0.72rem; }
+
+        .cta-section { margin: 3rem 0; background: linear-gradient(135deg, #0d1f3c 0%, #1b2838 50%, #162330 100%); border: 1px solid #2a4a6b; border-radius: 12px; padding: 2.5rem; display: flex; justify-content: space-between; align-items: center; gap: 2rem; position: relative; overflow: hidden; }
+        .cta-section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(ellipse at left, rgba(102,192,244,0.06) 0%, transparent 60%); pointer-events: none; }
+        .cta-label { color: #66c0f4; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; margin-bottom: 0.5rem; }
+        .cta-title { color: #ffffff; font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.3px; }
+        .cta-desc { color: #8b8b8b; font-size: 0.875rem; line-height: 1.6; max-width: 480px; }
+        .cta-btn { background: linear-gradient(135deg, #1b8bed, #1470c4); color: white; border: none; padding: 0.9rem 2rem; border-radius: 8px; font-size: 1rem; cursor: pointer; transition: all 0.2s; font-weight: 600; text-decoration: none; display: inline-block; white-space: nowrap; box-shadow: 0 4px 20px rgba(27,139,237,0.3); flex-shrink: 0; }
+        .cta-btn:hover { background: linear-gradient(135deg, #2a9fff, #1b8bed); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(27,139,237,0.5); }
+
+        .footer { border-top: 1px solid #2a4a6b; padding: 1.5rem 0; text-align: center; color: #555; font-size: 0.8rem; }
+        .footer a { color: #66c0f4; text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+
+        .skeleton { background: linear-gradient(90deg, #1b2838 25%, #243447 50%, #1b2838 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .skeleton-card { background: linear-gradient(145deg, #1b2838, #162330); border: 1px solid #2a4a6b; border-radius: 10px; overflow: hidden; }
+        .skeleton-cover { width: 100%; height: 85px; }
+        .skeleton-line { height: 10px; margin: 8px; border-radius: 4px; }
+        .skeleton-line-short { height: 10px; width: 55%; margin: 6px 8px; border-radius: 4px; }
+
+        .genre-pulse-grid { display: flex; flex-direction: column; gap: 0.6rem; }
+        .genre-pulse-item { display: flex; align-items: center; gap: 1rem; }
+        .genre-pulse-label { color: #e0e0e0; font-size: 0.82rem; font-weight: 500; width: 120px; flex-shrink: 0; }
+        .genre-pulse-track { flex: 1; height: 6px; background: #1b2838; border-radius: 3px; overflow: hidden; border: 1px solid #2a4a6b; }
+        .genre-pulse-fill { height: 100%; background: linear-gradient(90deg, #1b8bed, #66c0f4); border-radius: 3px; transition: width 1s ease; width: 0%; }
+        .genre-pulse-count { color: #8b8b8b; font-size: 0.75rem; width: 60px; text-align: right; flex-shrink: 0; }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .page { padding: 1rem; }
+            .top-nav { padding: 0.75rem 1rem; }
+            .nav-title { font-size: 1rem; }
+            .nav-btn { padding: 0.5rem 0.9rem; font-size: 0.8rem; }
+
+            .hero { padding: 2rem 0 1.5rem; margin-bottom: 2rem; }
+            .hero-title { font-size: 1.8rem; letter-spacing: -0.5px; }
+            .hero-summary { font-size: 0.9rem; }
+
+            .marquee-img { width: 120px; height: 56px; }
+
+            .live-stats { grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 2rem; }
+            .live-stat-value { font-size: 1.5rem; }
+
+            .moment-card { flex-direction: column; min-height: auto; }
+            .moment-cover-wrap { width: 100%; height: 160px; }
+            .moment-cover-fade { top: auto; bottom: 0; left: 0; right: 0; width: 100%; height: 60px; background: linear-gradient(to bottom, transparent, #162330); }
+            .moment-content { padding: 1.25rem; }
+            .moment-name { font-size: 1.2rem; }
+            .moment-skeleton { height: 280px; }
+
+            .section-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            .section-insight { text-align: left; max-width: 100%; }
+
+            .trending-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+            .top-grid { grid-template-columns: 1fr; }
+            .gems-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+
+            .cta-section { flex-direction: column; padding: 1.5rem; gap: 1.25rem; }
+            .cta-title { font-size: 1.1rem; }
+            .cta-btn { width: 100%; text-align: center; }
+
+            .genre-pulse-label { width: 80px; font-size: 0.75rem; }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title { font-size: 1.5rem; }
+            .live-stats { grid-template-columns: 1fr; }
+            .trending-grid { grid-template-columns: 1fr; }
+            .gems-grid { grid-template-columns: 1fr; }
+        }
+
+        
+    </style>
+</head>
+<body>
+
+<nav class="top-nav">
+    <a href="/" class="nav-brand">
+        <span class="nav-logo">⚡</span>
+        <span class="nav-title">Steam Claude Analytics</span>
+    </a>
+    <a href="/app" class="nav-btn">Analyze My Library →</a>
+</nav>
+
+<div class="page">
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-eyebrow">Steam · Live Data</div>
+        <h1 class="hero-title">What's happening on<br><span>Steam right now</span></h1>
+        <p class="hero-summary loading" id="heroSummary"></p>
+    </section>
+
+    <!-- Marquee -->
+    <div class="marquee-wrap" id="marqueeWrap" style="display:none;">
+        <div class="marquee-track" id="marqueeTrack"></div>
+    </div>
+
+    <!-- Live Stats -->
+    <div class="live-stats" style="margin-top:2rem;">
+        <div class="live-stat-box">
+            <div class="live-stat-value" id="statTotalPlayers">—</div>
+            <div class="live-stat-label">Players this fortnight</div>
+        </div>
+        <div class="live-stat-box">
+            <div class="live-stat-value" id="statAvgHours">—</div>
+            <div class="live-stat-label">Avg hours per game</div>
+        </div>
+        <div class="live-stat-box">
+            <div class="live-stat-value" id="statTrendingCount">—</div>
+            <div class="live-stat-label">Games tracked</div>
+        </div>
+    </div>
+
+    <!-- Game of the Moment -->
+    <section class="section">
+        <div class="section-header">
+            <div>
+                <div class="section-label">Spotlight</div>
+                <div class="section-title">Game of the Moment</div>
+            </div>
+        </div>
+        <div id="momentCard" class="moment-skeleton skeleton"></div>
+    </section>
+
+    <!-- Trending -->
+    <section class="section">
+        <div class="section-header">
+            <div>
+                <div class="section-label">This fortnight</div>
+                <div class="section-title">Trending on Steam</div>
+            </div>
+            <div class="section-insight" id="trendingInsight"></div>
+        </div>
+        <div class="trending-grid" id="trendingGrid">
+            <div class="skeleton-card"><div class="skeleton skeleton-cover"></div><div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line-short"></div></div></div>
+            <div class="skeleton-card"><div class="skeleton skeleton-cover"></div><div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line-short"></div></div></div>
+            <div class="skeleton-card"><div class="skeleton skeleton-cover"></div><div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line-short"></div></div></div>
+            <div class="skeleton-card"><div class="skeleton skeleton-cover"></div><div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line-short"></div></div></div>
+            <div class="skeleton-card"><div class="skeleton skeleton-cover"></div><div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line-short"></div></div></div>
+            <div class="skeleton-card"><div class="skeleton skeleton-cover"></div><div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line-short"></div></div></div>
+            <div class="skeleton-card"><div class="skeleton skeleton-cover"></div><div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line-short"></div></div></div>
+            <div class="skeleton-card"><div class="skeleton skeleton-cover"></div><div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line-short"></div></div></div>
+        </div>
+    </section>
+
+    <!-- Genre Pulse -->
+    <section class="section">
+        <div class="section-header">
+            <div>
+                <div class="section-label">Right now</div>
+                <div class="section-title">Genre Pulse</div>
+            </div>
+            <div class="section-insight">Based on this week's trending games</div>
+        </div>
+        <div class="genre-pulse-grid" id="genrePulseGrid">
+            <div class="genre-pulse-item"><div class="skeleton" style="width:120px;height:12px;border-radius:4px;"></div><div class="skeleton" style="flex:1;height:6px;border-radius:3px;"></div><div class="skeleton" style="width:60px;height:12px;border-radius:4px;"></div></div>
+            <div class="genre-pulse-item"><div class="skeleton" style="width:120px;height:12px;border-radius:4px;"></div><div class="skeleton" style="flex:1;height:6px;border-radius:3px;"></div><div class="skeleton" style="width:60px;height:12px;border-radius:4px;"></div></div>
+            <div class="genre-pulse-item"><div class="skeleton" style="width:120px;height:12px;border-radius:4px;"></div><div class="skeleton" style="flex:1;height:6px;border-radius:3px;"></div><div class="skeleton" style="width:60px;height:12px;border-radius:4px;"></div></div>
+            <div class="genre-pulse-item"><div class="skeleton" style="width:120px;height:12px;border-radius:4px;"></div><div class="skeleton" style="flex:1;height:6px;border-radius:3px;"></div><div class="skeleton" style="width:60px;height:12px;border-radius:4px;"></div></div>
+            <div class="genre-pulse-item"><div class="skeleton" style="width:120px;height:12px;border-radius:4px;"></div><div class="skeleton" style="flex:1;height:6px;border-radius:3px;"></div><div class="skeleton" style="width:60px;height:12px;border-radius:4px;"></div></div>
+        </div>
+    </section>
+
+    <!-- Top Owned -->
+    <section class="section">
+        <div class="section-header">
+            <div>
+                <div class="section-label">All time</div>
+                <div class="section-title">Most owned games on Steam</div>
+            </div>
+            <div class="section-insight" id="topInsight"></div>
+        </div>
+        <div class="top-grid" id="topGrid">
+            <div class="top-card"><div class="skeleton" style="width:72px;height:34px;border-radius:3px;flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line-short"></div></div></div>
+            <div class="top-card"><div class="skeleton" style="width:72px;height:34px;border-radius:3px;flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line-short"></div></div></div>
+            <div class="top-card"><div class="skeleton" style="width:72px;height:34px;border-radius:3px;flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line-short"></div></div></div>
+            <div class="top-card"><div class="skeleton" style="width:72px;height:34px;border-radius:3px;flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line-short"></div></div></div>
+            <div class="top-card"><div class="skeleton" style="width:72px;height:34px;border-radius:3px;flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line-short"></div></div></div>
+            <div class="top-card"><div class="skeleton" style="width:72px;height:34px;border-radius:3px;flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line-short"></div></div></div>
+        </div>
+    </section>
+
+    <!-- Hidden Gems -->
+    <section class="section">
+        <div class="section-header">
+            <div>
+                <div class="section-label">Underrated</div>
+                <div class="section-title">Hidden Gems</div>
+            </div>
+            <div class="section-insight" id="gemsInsight"></div>
+        </div>
+        <div class="gems-grid" id="gemsGrid">
+            <div class="gem-card"><div class="skeleton skeleton-cover"></div><div style="padding:0.75rem;"><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line-short"></div></div></div>
+            <div class="gem-card"><div class="skeleton skeleton-cover"></div><div style="padding:0.75rem;"><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line-short"></div></div></div>
+            <div class="gem-card"><div class="skeleton skeleton-cover"></div><div style="padding:0.75rem;"><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line-short"></div></div></div>
+            <div class="gem-card"><div class="skeleton skeleton-cover"></div><div style="padding:0.75rem;"><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line-short"></div></div></div>
+            <div class="gem-card"><div class="skeleton skeleton-cover"></div><div style="padding:0.75rem;"><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line-short"></div></div></div>
+            <div class="gem-card"><div class="skeleton skeleton-cover"></div><div style="padding:0.75rem;"><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line-short"></div></div></div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <div class="cta-section">
+        <div>
+            <div class="cta-label">Want more?</div>
+            <div class="cta-title">Analyze your own Steam library</div>
+            <p class="cta-desc">Get a personalized breakdown of your gaming habits, achievement score, genre preferences, backlog analysis, and AI-powered game recommendations — all from your Steam ID.</p>
+        </div>
+        <a href="/app" class="cta-btn">Analyze My Library →</a>
+    </div>
+
+    <footer class="footer">
+        <p>Data from <a href="https://steamspy.com" target="_blank">SteamSpy</a> · Commentary by Claude AI · <a href="/app">Launch analyzer</a></p>
+    </footer>
+
+</div>
+
+<script>
+function renderMarquee(games) {
+    const track = document.getElementById('marqueeTrack');
+    const all = [...games, ...games];
+    track.innerHTML = all.map(function(g) {
+        return '<img class="marquee-img" src="https://cdn.cloudflare.steamstatic.com/steam/apps/' + g.appid + '/header.jpg" alt="' + g.name + '" title="' + g.name + '" onerror="this.style.display=\'none\'"/>';
+    }).join('');
+    document.getElementById('marqueeWrap').style.display = 'block';
+}
+
+function animateCounterLanding(elementId, targetValue, suffix) {
+    suffix = suffix || '';
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    const startTime = performance.now();
+    const duration = 1500;
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const currentValue = Math.floor(targetValue * eased);
+        element.textContent = currentValue.toLocaleString() + suffix;
+        if (progress < 1) requestAnimationFrame(update);
+        else element.textContent = targetValue.toLocaleString() + suffix;
+    }
+    requestAnimationFrame(update);
+}
+
+function renderGenrePulse(trending) {
+    const genreCounts = {};
+    trending.forEach(function(g, i) {
+        const weight = Math.max(1, 12 - i);
+        const name = g.name.toLowerCase();
+        let assigned = false;
+        if (name.includes('counter-strike') || name.includes('valorant') || name.includes('rainbow six') || name.includes('battlefield') || name.includes('call of duty') || name.includes('finals') || name.includes('dirty bomb') || name.includes('wrath') || name.includes('doom') || name.includes('ultrakill') || name.includes('tf2') || name.includes('team fortress')) {
+            genreCounts['Shooter'] = (genreCounts['Shooter'] || 0) + weight; assigned = true;
+        }
+        if (name.includes('dota') || name.includes('civilization') || name.includes('hearts of iron') || name.includes('total war') || name.includes('stellaris')) {
+            genreCounts['Strategy'] = (genreCounts['Strategy'] || 0) + weight; assigned = true;
+        }
+        if (name.includes('elden ring') || name.includes('baldur') || name.includes('witcher') || name.includes('cyberpunk') || name.includes('dark souls') || name.includes('hades') || name.includes('dead cells') || name.includes('hollow knight') || name.includes('sekiro')) {
+            genreCounts['RPG'] = (genreCounts['RPG'] || 0) + weight; assigned = true;
+        }
+        if (name.includes('stardew') || name.includes('cities') || name.includes('planet') || name.includes('farming') || name.includes('sims')) {
+            genreCounts['Simulation'] = (genreCounts['Simulation'] || 0) + weight; assigned = true;
+        }
+        if (name.includes('minecraft') || name.includes('terraria') || name.includes('satisfactory') || name.includes('factorio') || name.includes('valheim') || name.includes('rust') || name.includes('ark')) {
+            genreCounts['Survival'] = (genreCounts['Survival'] || 0) + weight; assigned = true;
+        }
+        if (!assigned) { genreCounts['Action'] = (genreCounts['Action'] || 0) + weight; }
+    });
+    const sorted = Object.entries(genreCounts).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 5);
+    const max = sorted[0] ? sorted[0][1] : 1;
+    document.getElementById('genrePulseGrid').innerHTML = sorted.map(function(entry) {
+        const pct = Math.round((entry[1] / max) * 100);
+        return '<div class="genre-pulse-item"><div class="genre-pulse-label">' + entry[0] + '</div><div class="genre-pulse-track"><div class="genre-pulse-fill" style="width:' + pct + '%;"></div></div><div class="genre-pulse-count">' + pct + '%</div></div>';
+    }).join('');
+}
+
+async function loadLandingData() {
+    try {
+        const r = await fetch('http://localhost:8000/landing-data');
+        const d = await r.json();
+        const trending = d.trending || [];
+        const top = d.top || [];
+        const gems = d.gems || [];
+        const commentary = d.commentary || {};
+        const mom = d.game_of_moment || {};
+
+        const heroEl = document.getElementById('heroSummary');
+        heroEl.classList.remove('loading');
+        heroEl.textContent = commentary.weekly_summary || '';
+
+        renderMarquee(trending);
+
+        const totalPlayers = trending.reduce(function(sum, g) { return sum + (g.players_2weeks || 0); }, 0);
+        const avgHours = trending.length > 0 ? Math.round(trending.reduce(function(sum, g) { return sum + (g.average_forever || 0); }, 0) / trending.length / 60) : 0;
+        animateCounterLanding('statTotalPlayers', totalPlayers, '');
+        animateCounterLanding('statAvgHours', avgHours, 'h');
+        animateCounterLanding('statTrendingCount', trending.length, '');
+
+        if (mom.name) {
+            const coverUrl = mom.appid ? 'https://cdn.cloudflare.steamstatic.com/steam/apps/' + mom.appid + '/header.jpg' : '';
+            document.getElementById('momentCard').outerHTML =
+                '<div class="moment-card" id="momentCard">' +
+                (coverUrl ? '<div class="moment-cover-wrap"><img class="moment-cover" src="' + coverUrl + '" onerror="this.style.display=\'none\'"/><div class="moment-cover-fade"></div></div>' : '') +
+                '<div class="moment-content"><div class="moment-eyebrow">⚡ Game of the Moment</div><div class="moment-name">' + mom.name + '</div><div class="moment-why">' + mom.why_now + '</div><div class="moment-best">' + mom.best_for + '</div></div></div>';
+        }
+
+        document.getElementById('trendingInsight').textContent = commentary.trending_insight || '';
+        document.getElementById('trendingGrid').innerHTML = trending.map(function(g, i) {
+            const players = g.players_2weeks ? g.players_2weeks.toLocaleString() + ' players' : '';
+            const hours = g.average_forever > 0 ? Math.round(g.average_forever / 60) + 'h avg' : '';
+            return '<div class="trending-card"><img class="trending-cover" src="https://cdn.cloudflare.steamstatic.com/steam/apps/' + g.appid + '/header.jpg" onerror="this.style.display=\'none\'"/><div class="trending-info"><div class="trending-rank ' + (i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : 'default') + '">#' + (i + 1) + '</div><div class="trending-name" title="' + g.name + '">' + g.name + '</div><div class="trending-meta">' + players + (hours ? ' · ' + hours : '') + '</div></div></div>';
+        }).join('');
+
+        renderGenrePulse(trending);
+
+        document.getElementById('topInsight').textContent = commentary.all_time_insight || '';
+        document.getElementById('topGrid').innerHTML = top.map(function(g, i) {
+            return '<div class="top-card"><span class="top-num">' + (i + 1) + '</span><img class="top-cover" src="https://cdn.cloudflare.steamstatic.com/steam/apps/' + g.appid + '/header.jpg" onerror="this.style.visibility=\'hidden\'"/><div style="flex:1; min-width:0;"><div class="top-name">' + g.name + '</div><div class="top-owners">' + g.owners + ' owners</div></div></div>';
+        }).join('');
+
+        document.getElementById('gemsInsight').textContent = commentary.gems_insight || '';
+        document.getElementById('gemsGrid').innerHTML = gems.map(function(g) {
+            return '<div class="gem-card"><img class="gem-cover" src="https://cdn.cloudflare.steamstatic.com/steam/apps/' + g.appid + '/header.jpg" onerror="this.style.display=\'none\'"/><div class="gem-info"><div class="gem-badge">★ ' + g.ratio + '% positive</div><div class="gem-name" title="' + g.name + '">' + g.name + '</div><div class="gem-owners">' + g.owners + ' owners</div></div></div>';
+        }).join('');
+
+    } catch(e) {
+        document.getElementById('heroSummary').textContent = 'Could not load Steam data. Make sure the server is running.';
+        document.getElementById('heroSummary').classList.remove('loading');
+    }
+}
+
+loadLandingData();
+</script>
+
+</body>
+</html>
