@@ -366,7 +366,7 @@ function renderGenrePulse(trending) {
 
 async function loadLandingData() {
     try {
-        const r = await fetch('http://localhost:8000/landing-data');
+        const r = await fetch('/landing-data');
         const d = await r.json();
         const trending = d.trending || [];
         const top = d.top || [];
