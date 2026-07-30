@@ -397,7 +397,7 @@ async function loadLandingData() {
         }
 
         if (mom.name) {
-            const coverUrl = mom.appid ? 'https://cdn.cloudflare.steamstatic.com/steam/apps/' + mom.appid + '/header.jpg' : '';
+            'https://cdn.cloudflare.steamstatic.com/steam/apps/' + mom.appid + '/capsule_616x353.jpg'
             document.getElementById('momentCard').outerHTML =
                 '<div class="moment-card" id="momentCard">' +
                 (coverUrl ? '<div class="moment-cover-wrap"><img class="moment-cover" src="' + coverUrl + '" onerror="this.style.display=\'none\'"/><div class="moment-cover-fade"></div></div>' : '') +
