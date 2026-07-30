@@ -175,16 +175,16 @@
 
     <div class="live-stats" style="margin-top:2rem;">
         <div class="live-stat-box">
-            <div class="live-stat-value" id="statTotalPlayers">—</div>
-            <div class="live-stat-label">Players this fortnight</div>
-        </div>
-        <div class="live-stat-box">
-            <div class="live-stat-value" id="statAvgHours">—</div>
-            <div class="live-stat-label">Avg hours per game</div>
-        </div>
-        <div class="live-stat-box">
             <div class="live-stat-value" id="statTrendingCount">—</div>
-            <div class="live-stat-label">Games tracked</div>
+            <div class="live-stat-label">Games Tracked</div>
+        </div>
+        <div class="live-stat-box">
+            <div class="live-stat-value" id="statTopGenre">—</div>
+            <div class="live-stat-label">Top Genre</div>
+        </div>
+        <div class="live-stat-box">
+            <div class="live-stat-value" id="statTopGame">—</div>
+            <div class="live-stat-label">Most Played</div>
         </div>
     </div>
 
@@ -224,7 +224,6 @@
                 <div class="section-label">Right now</div>
                 <div class="section-title">Genre Pulse</div>
             </div>
-            <div class="section-insight">Based on this week's trending games</div>
         </div>
         <div class="genre-pulse-grid" id="genrePulseGrid">
             <div class="genre-pulse-item"><div class="skeleton" style="width:120px;height:12px;border-radius:4px;"></div><div class="skeleton" style="flex:1;height:6px;border-radius:3px;"></div><div class="skeleton" style="width:60px;height:12px;border-radius:4px;"></div></div>
@@ -361,11 +360,39 @@ async function loadLandingData() {
 
         renderMarquee(trending);
 
-        const totalPlayers = trending.reduce(function(sum, g) { return sum + (g.players_2weeks || 0); }, 0);
-        const avgHours = trending.length > 0 ? Math.round(trending.reduce(function(sum, g) { return sum + (g.average_forever || 0); }, 0) / trending.length / 60) : 0;
-        animateCounterLanding('statTotalPlayers', totalPlayers, '');
-        animateCounterLanding('statAvgHours', avgHours, 'h');
         animateCounterLanding('statTrendingCount', trending.length, '');
+
+        const topGame = trending.length > 0 ? trending[0].name : '—';
+        const topGameEl = document.getElementById('statTopGame');
+        if (topGameEl) {
+            topGameEl.textContent = topGame.length > 12 ? topGame.slice(0, 12) + '…' : topGame;
+            topGameEl.style.fontSize = '1rem';
+            topGameEl.style.lineHeight = '1.3';
+            topGameEl.style.paddingTop = '0.25rem';
+        }
+
+        const genreCounts = {};
+        trending.forEach(function(g, i) {
+            const weight = Math.max(1, 12 - i);
+            const name = g.name.toLowerCase();
+            if (name.includes('counter-strike') || name.includes('valorant') || name.includes('rainbow six') || name.includes('finals') || name.includes('doom') || name.includes('team fortress') || name.includes('battlefield') || name.includes('call of duty')) {
+                genreCounts['Shooter'] = (genreCounts['Shooter'] || 0) + weight;
+            } else if (name.includes('dota') || name.includes('civilization') || name.includes('hearts of iron') || name.includes('total war') || name.includes('stellaris')) {
+                genreCounts['Strategy'] = (genreCounts['Strategy'] || 0) + weight;
+            } else if (name.includes('elden ring') || name.includes('baldur') || name.includes('witcher') || name.includes('cyberpunk') || name.includes('dark souls') || name.includes('hades')) {
+                genreCounts['RPG'] = (genreCounts['RPG'] || 0) + weight;
+            } else if (name.includes('minecraft') || name.includes('valheim') || name.includes('rust') || name.includes('ark') || name.includes('terraria')) {
+                genreCounts['Survival'] = (genreCounts['Survival'] || 0) + weight;
+            } else {
+                genreCounts['Action'] = (genreCounts['Action'] || 0) + weight;
+            }
+        });
+        const topGenre = Object.entries(genreCounts).sort(function(a, b) { return b[1] - a[1]; })[0];
+        const topGenreEl = document.getElementById('statTopGenre');
+        if (topGenreEl && topGenre) {
+            topGenreEl.textContent = topGenre[0];
+            topGenreEl.style.fontSize = '1.2rem';
+        }
 
         if (mom.name) {
             const coverUrl = mom.appid ? 'https://cdn.cloudflare.steamstatic.com/steam/apps/' + mom.appid + '/header.jpg' : '';
