@@ -48,9 +48,9 @@
         .section-label { color: #66c0f4; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 0.25rem; }
         .section-quote { color: #a0b8cc; font-size: 0.85rem; font-style: italic; line-height: 1.6; padding: 0.75rem 1rem; border-left: 3px solid #66c0f4; background: rgba(102,192,244,0.05); border-radius: 0 6px 6px 0; margin-bottom: 1.25rem; }
 
-        .moment-card { background: linear-gradient(135deg, #0d1f3c 0%, #1b2838 50%, #162330 100%); border: 1px solid #2a4a6b; border-radius: 12px; overflow: hidden; display: flex; gap: 0; min-height: 180px; position: relative; }
+        .moment-card { background: linear-gradient(135deg, #0d1f3c 0%, #1b2838 50%, #162330 100%); border: 1px solid #2a4a6b; border-radius: 12px; overflow: hidden; display: flex; gap: 0; position: relative; }
         .moment-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(ellipse at top left, rgba(102,192,244,0.06) 0%, transparent 60%); pointer-events: none; }
-        .moment-cover-wrap { flex-shrink: 0; width: 300px; min-height: 200px; position: relative; overflow: hidden; }
+        .moment-cover-wrap { flex-shrink: 0; width: 300px; position: relative; overflow: hidden; }
         .moment-cover { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(0.8); }
         .moment-cover-fade { position: absolute; top: 0; right: 0; bottom: 0; width: 80px; background: linear-gradient(to right, transparent, #162330); }
         .moment-content { flex: 1; padding: 1.75rem; display: flex; flex-direction: column; justify-content: center; }
@@ -59,6 +59,7 @@
         .moment-why { color: #a0b8cc; font-size: 0.875rem; line-height: 1.7; margin-bottom: 0.75rem; }
         .moment-best { color: #8b8b8b; font-size: 0.8rem; font-style: italic; }
         .moment-skeleton { background: linear-gradient(145deg, #1b2838, #162330); border: 1px solid #2a4a6b; border-radius: 12px; height: 180px; }
+        .moment-content { flex: 1; padding: 1.75rem; display: flex; flex-direction: column; justify-content: center; min-height: 220px; }
 
         .trending-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
         .trending-card { background: linear-gradient(145deg, #1b2838, #162330); border: 1px solid #2a4a6b; border-radius: 10px; overflow: hidden; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
