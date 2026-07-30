@@ -48,13 +48,16 @@
         .section-label { color: #66c0f4; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 0.25rem; }
         .section-quote { color: #a0b8cc; font-size: 0.85rem; font-style: italic; line-height: 1.6; padding: 0.75rem 1rem; border-left: 3px solid #66c0f4; background: rgba(102,192,244,0.05); border-radius: 0 6px 6px 0; margin-bottom: 1.25rem; }
 
-        .moment-card { border: 1px solid #2a4a6b; border-radius: 12px; overflow: hidden; display: flex; position: relative; background-color: #1b2838; }
-        .moment-content { flex: 1; padding: 1.75rem; display: flex; flex-direction: column; justify-content: center; min-height: 200px; position: relative; z-index: 1; }
+        .moment-card { background: linear-gradient(135deg, #0d1f3c 0%, #1b2838 50%, #162330 100%); border: 1px solid #2a4a6b; border-radius: 12px; overflow: hidden; display: flex; position: relative; min-height: 220px; }
+        .moment-cover-wrap { flex-shrink: 0; width: 160px; align-self: stretch; position: relative; overflow: hidden; }
+        .moment-cover-wrap { background-size: cover; background-position: center; }
+        .moment-cover-fade { position: absolute; top: 0; right: 0; bottom: 0; width: 40px; background: linear-gradient(to right, transparent, #162330); }
+        .moment-content { flex: 1; padding: 1.75rem; display: flex; flex-direction: column; justify-content: center; }
         .moment-eyebrow { color: #66c0f4; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; margin-bottom: 0.5rem; }
         .moment-name { color: #ffffff; font-size: 1.6rem; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 0.75rem; line-height: 1.1; }
         .moment-why { color: #a0b8cc; font-size: 0.875rem; line-height: 1.7; margin-bottom: 0.75rem; }
         .moment-best { color: #8b8b8b; font-size: 0.8rem; font-style: italic; }
-        .moment-skeleton { background: linear-gradient(145deg, #1b2838, #162330); border: 1px solid #2a4a6b; border-radius: 12px; height: 200px; }
+        .moment-skeleton { background: linear-gradient(145deg, #1b2838, #162330); border: 1px solid #2a4a6b; border-radius: 12px; height: 220px; }
 
         .trending-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
         .trending-card { background: linear-gradient(145deg, #1b2838, #162330); border: 1px solid #2a4a6b; border-radius: 10px; overflow: hidden; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
@@ -394,7 +397,8 @@ async function loadLandingData() {
         if (mom.name) {
             const coverUrl = mom.appid ? 'https://cdn.cloudflare.steamstatic.com/steam/apps/' + mom.appid + '/library_600x900.jpg' : '';
             document.getElementById('momentCard').outerHTML =
-                '<div class="moment-card" id="momentCard" style="' + (coverUrl ? 'background-image: linear-gradient(to right, rgba(13,31,60,0.3) 0%, rgba(22,35,48,0.95) 50%, #162330 100%), url(' + coverUrl + '); background-size: cover; background-position: center;' : '') + '">' +
+                '<div class="moment-card" id="momentCard">' +
+                (coverUrl ? '<div class="moment-cover-wrap" style="background-image:url(' + coverUrl + '); background-size:cover; background-position:center;"><div class="moment-cover-fade"></div></div>' : '') +
                 '<div class="moment-content">' +
                 '<div class="moment-eyebrow">⚡ Game of the Moment</div>' +
                 '<div class="moment-name">' + mom.name + '</div>' +
