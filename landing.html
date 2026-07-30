@@ -366,7 +366,7 @@ async function loadLandingData() {
         const topGame = trending.length > 0 ? trending[0].name : '—';
         const topGameEl = document.getElementById('statTopGame');
         if (topGameEl) {
-            topGameEl.textContent = topGame.length > 25 ? topGame.slice(0, 25) + '…' : topGame;
+            topGameEl.textContent = topGame.length > 50 ? topGame.slice(0, 50) + '…' : topGame;
             topGameEl.style.fontSize = topGame.length > 10 ? '0.85rem' : '1rem';
             topGameEl.style.fontSize = '1rem';
             topGameEl.style.lineHeight = '1.3';
