@@ -399,7 +399,7 @@ async function loadLandingData() {
             const coverUrl = mom.appid ? 'https://cdn.cloudflare.steamstatic.com/steam/apps/' + mom.appid + '/header.jpg' : '';
             document.getElementById('momentCard').outerHTML =
                 '<div class="moment-card" id="momentCard">' +
-                (coverUrl ? '<div class="moment-cover-wrap"><img class="moment-cover" src="' + coverUrl + '" /><div class="moment-cover-fade"></div></div>' : '') +
+                (coverUrl ? '<div class="moment-cover-wrap" style="background-image:url(' + coverUrl + '); background-size:cover; background-position:center;"><div class="moment-cover-fade"></div></div>' : '') +
                 '<div class="moment-content">' +
                 '<div class="moment-eyebrow">⚡ Game of the Moment</div>' +
                 '<div class="moment-name">' + mom.name + '</div>' +
