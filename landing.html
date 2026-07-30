@@ -392,7 +392,7 @@ async function loadLandingData() {
         }
 
         if (mom.name) {
-            const coverUrl = mom.appid ? 'https://cdn.cloudflare.steamstatic.com/steam/apps/' + mom.appid + '/header.jpg' : '';
+            const coverUrl = mom.appid ? 'https://cdn.cloudflare.steamstatic.com/steam/apps/' + mom.appid + '/library_600x900.jpg' : '';
             document.getElementById('momentCard').outerHTML =
                 '<div class="moment-card" id="momentCard" style="' + (coverUrl ? 'background-image: linear-gradient(to right, rgba(13,31,60,0.3) 0%, rgba(22,35,48,0.95) 50%, #162330 100%), url(' + coverUrl + '); background-size: cover; background-position: center;' : '') + '">' +
                 '<div class="moment-content">' +
