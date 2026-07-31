@@ -74,8 +74,3 @@ Then visit `http://localhost:8000`
 - First analysis of a Steam ID takes 30-60 seconds — subsequent loads are cached for 4 hours
 - Steam Family shared games are not included in the library (Steam API limitation)
 - If you do not have a steam ID, use this one 76561198155547142.
-
-- Screenshot of the landing page below.
-![img.png](LandingPage.png)
-- Screenshot of the analyzer below
-![img_1.png](Analyzer.png)
