@@ -15,6 +15,10 @@ An AI-powered Steam library analyzer and gaming stats dashboard built with FastA
 - Review analysis for any game in your library
 - Mood-based game picker from your unplayed backlog
 - Recent activity and most played showcase
+- Screenshot of the landing page below.
+![Landing Page.png](LandingPage.png)
+- Screenshot of the analyzer below
+![Analyzer.png](Analyzer.png)
 
 ## Tech stack
 
@@ -72,4 +76,6 @@ Then visit `http://localhost:8000`
 - If you do not have a steam ID, use this one 76561198155547142.
 
 - Screenshot of the landing page below.
-![img.png](img.png)
+![img.png](LandingPage.png)
+- Screenshot of the analyzer below
+![img_1.png](Analyzer.png)

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from dotenv import load_dotenv
 from steam import get_owned_games, get_reviews, get_recent_games, get_achievements, get_achievement_schema, get_player_summary
 from claude import get_recommendation, analyze_reviews, generate_insights, analyze_achievements, estimate_backlog, gaming_personality, game_match, generate_landing_commentary, generate_game_of_moment
@@ -11,6 +11,9 @@ from contextlib import asynccontextmanager
 from sqlmodel import Session, select
 from datetime import datetime, timedelta
 from steamspy import get_top_games_by_players, get_top_games_by_owners, get_hidden_gems
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 load_dotenv()
 
@@ -20,6 +23,9 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 @app.get("/")
 def serve_landing():
@@ -30,7 +36,8 @@ def serve_frontend():
     return FileResponse("index.html")
 
 @app.get("/dashboard/{steam_id}")
-async def dashboard(steam_id: str):
+@limiter.limit("5/minute")
+async def dashboard(request: Request, steam_id: str):
     try:
         games, recent = await asyncio.gather(
             get_owned_games(steam_id),
@@ -40,10 +47,7 @@ async def dashboard(steam_id: str):
         raise HTTPException(status_code=500, detail="Failed to connect to Steam. Try again in a moment.")
 
     if not games:
-        raise HTTPException(status_code=403,
-                            detail="No games found. Your Steam profile is likely set to private. Set it to public at steamcommunity.com/my/edit/settings — make sure 'Game Details' is also set to public, not just your main profile.")
-
-
+        raise HTTPException(status_code=403, detail="No games found. Your Steam profile is likely set to private. Set it to public at steamcommunity.com/my/edit/settings — make sure 'Game Details' is also set to public, not just your main profile.")
 
     review_list = []
     app_name = None
@@ -66,6 +70,7 @@ async def dashboard(steam_id: str):
         "games_found": len(games),
         "recommendation": recommendation,
         "insights": insights,
+        "recent": recent,
         "review_analysis": {
             "game": app_name,
             "analysis": review_analysis
@@ -164,7 +169,8 @@ async def genres(steam_id: str):
     return result
 
 @app.get("/backlog/{steam_id}")
-async def backlog(steam_id: str):
+@limiter.limit("5/minute")
+async def backlog(request: Request, steam_id: str):
     cached = get_cached(CachedBacklog, steam_id)
     if cached:
         return cached
@@ -192,7 +198,8 @@ async def backlog(steam_id: str):
     return response
 
 @app.get("/personality/{steam_id}")
-async def personality(steam_id: str):
+@limiter.limit("5/minute")
+async def personality(request: Request, steam_id: str):
     cached = get_cached(CachedPersonality, steam_id)
     if cached:
         return cached
@@ -230,7 +237,8 @@ async def profile(steam_id: str):
     }
 
 @app.get("/achievements/{steam_id}")
-async def achievements(steam_id: str):
+@limiter.limit("5/minute")
+async def achievements(request: Request, steam_id: str):
     cached = get_cached(CachedAchievements, steam_id)
     if cached:
         return cached
@@ -311,7 +319,8 @@ async def achievements(steam_id: str):
     return response
 
 @app.get("/match/{steam_id}")
-async def match(steam_id: str, time: str = Query(...), mood: str = Query(...), company: str = Query(...), style: str = Query(...)):
+@limiter.limit("5/minute")
+async def match(request: Request, steam_id: str, time: str = Query(...), mood: str = Query(...), company: str = Query(...), style: str = Query(...)):
     games = await get_owned_games(steam_id)
     if not games:
         raise HTTPException(status_code=404, detail="No games found.")
