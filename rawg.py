@@ -19,17 +19,11 @@ async def get_game_genres(game_name: str) -> list:
             })
             data = r.json()
             results = data.get("results", [])
-
             if not results:
-
                 return []
-
-            matched_name = results[0].get("name", "")
             genres = [g["name"] for g in results[0].get("genres", [])]
-
             return genres
         except Exception:
-           
             return []
 
 

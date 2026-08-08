@@ -58,11 +58,14 @@ async def dashboard(request: Request, steam_id: str):
             break
 
     try:
-        recommendation, insights, review_analysis = await asyncio.gather(
+        recommendation, insights = await asyncio.gather(
             asyncio.to_thread(get_recommendation, games),
             asyncio.to_thread(generate_insights, games, recent),
-            asyncio.to_thread(analyze_reviews, app_name, review_list) if review_list else asyncio.to_thread(lambda: "No reviews available.")
         )
+        if review_list:
+            review_analysis = await asyncio.to_thread(analyze_reviews, app_name, review_list)
+        else:
+            review_analysis = "No reviews available."
     except Exception:
         raise HTTPException(status_code=500, detail="Claude API error. Check your Anthropic API key.")
 
