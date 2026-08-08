@@ -1,3 +1,9 @@
+Introduction
+
+Steam Claude Analytics is a full stack web application that connects Steam's gaming API with Anthropic's Claude AI to turn raw gaming data into personalized narrative insights. Enter a Steam ID and the app tells you what kind of gamer you are, what your achievement progress says about your playstyle, and what you should play tonight based on your mood. There's also a public landing page that functions as a live Steam dashboard — showing trending games, hidden gems, and AI-generated commentary on what's happening across the platform right now.
+
+The project is built with FastAPI, Python, SQLite, and vanilla JavaScript, integrates four external APIs, and is deployed live on Railway.
+
 The Idea
 
 I wanted to build something that combined two things I was already interested in — gaming and AI. Steam has a rich public API with years of player data, and Claude is capable of generating genuinely insightful analysis rather than just summarizing numbers. The question was whether I could connect them in a way that felt useful rather than just a tech demo.
