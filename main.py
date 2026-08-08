@@ -6,7 +6,7 @@ import asyncio
 from fastapi.responses import FileResponse
 from rawg import get_genres_for_library, is_single_player
 from database import create_db, get_cached, save_cache, engine
-from models import CachedDashboard, CachedAchievements, CachedLibrary, CachedGenres, CachedBacklog, CachedPersonality, CachedLanding
+from models import CachedDashboard, CachedAchievements, CachedLibrary, CachedGenres, CachedBacklog, CachedPersonality, CachedProfile, CachedLanding
 from contextlib import asynccontextmanager
 from sqlmodel import Session, select
 from datetime import datetime, timedelta
@@ -38,6 +38,10 @@ def serve_frontend():
 @app.get("/dashboard/{steam_id}")
 @limiter.limit("5/minute")
 async def dashboard(request: Request, steam_id: str):
+    cached = get_cached(CachedDashboard, steam_id)
+    if cached:
+        return cached
+
     try:
         games, recent = await asyncio.gather(
             get_owned_games(steam_id),
@@ -69,7 +73,7 @@ async def dashboard(request: Request, steam_id: str):
     except Exception:
         raise HTTPException(status_code=500, detail="Claude API error. Check your Anthropic API key.")
 
-    return {
+    result = {
         "games_found": len(games),
         "recommendation": recommendation,
         "insights": insights,
@@ -79,6 +83,8 @@ async def dashboard(request: Request, steam_id: str):
             "analysis": review_analysis
         }
     }
+    save_cache(CachedDashboard, steam_id, result)
+    return result
 
 @app.get("/recommend/{steam_id}")
 async def recommend(steam_id: str):
@@ -132,12 +138,16 @@ async def insights(steam_id: str):
 
 @app.get("/library/{steam_id}")
 async def library(steam_id: str):
+    cached = get_cached(CachedLibrary, steam_id)
+    if cached:
+        return cached
+
     games = await get_owned_games(steam_id)
     if not games:
         raise HTTPException(status_code=404, detail="No games found. Is your Steam profile set to public?")
 
     sorted_games = sorted(games, key=lambda g: g.get("playtime_forever", 0), reverse=True)
-    return {
+    result = {
         "games": [
             {
                 "name": g.get("name", "Unknown"),
@@ -149,6 +159,8 @@ async def library(steam_id: str):
         ],
         "total": len(games)
     }
+    save_cache(CachedLibrary, steam_id, result)
+    return result
 
 @app.get("/genres/{steam_id}")
 async def genres(steam_id: str):
@@ -222,6 +234,10 @@ async def personality(request: Request, steam_id: str):
 
 @app.get("/profile/{steam_id}")
 async def profile(steam_id: str):
+    cached = get_cached(CachedProfile, steam_id)
+    if cached:
+        return cached
+
     player, recent = await asyncio.gather(
         get_player_summary(steam_id),
         get_recent_games(steam_id)
@@ -231,13 +247,15 @@ async def profile(steam_id: str):
 
     recent_hours = round(sum(g.get("playtime_2weeks", 0) for g in recent) / 60, 1)
 
-    return {
+    result = {
         "name": player.get("personaname", "Unknown"),
         "avatar": player.get("avatarfull", ""),
         "profile_url": player.get("profileurl", ""),
         "country": player.get("loccountrycode", ""),
         "recent_hours": recent_hours
     }
+    save_cache(CachedProfile, steam_id, result)
+    return result
 
 @app.get("/achievements/{steam_id}")
 @limiter.limit("5/minute")
@@ -250,7 +268,7 @@ async def achievements(request: Request, steam_id: str):
     if not games:
         raise HTTPException(status_code=404, detail="No games found.")
 
-    score_games = sorted(games, key=lambda g: g.get("playtime_forever", 0), reverse=True)[:25]
+    score_games = sorted(games, key=lambda g: g.get("playtime_forever", 0), reverse=True)[:15]
     top_games = score_games
 
     achievement_data = []

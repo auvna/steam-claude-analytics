@@ -32,6 +32,11 @@ class CachedPersonality(SQLModel, table=True):
     data: dict = Field(sa_column=Column(JSON))
     cached_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class CachedProfile(SQLModel, table=True):
+    steam_id: str = Field(primary_key=True)
+    data: dict = Field(sa_column=Column(JSON))
+    cached_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 class CachedLanding(SQLModel, table=True):
     id: int = Field(default=1, primary_key=True)
     data: dict = Field(sa_column=Column(JSON))

@@ -1,7 +1,7 @@
 import os
 from sqlmodel import SQLModel, Session, create_engine, select
 from datetime import datetime, timedelta
-from models import CachedDashboard, CachedAchievements, CachedLibrary, CachedGenres, CachedBacklog, CachedPersonality, CachedLanding
+from models import CachedDashboard, CachedAchievements, CachedLibrary, CachedGenres, CachedBacklog, CachedPersonality, CachedProfile, CachedLanding
 from dotenv import load_dotenv
 
 load_dotenv()
