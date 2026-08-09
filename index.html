@@ -657,12 +657,16 @@ function renderShowcase(games) {
 }
 
 function renderActivityFeed(recentGames) {
-    if (!recentGames || recentGames.length === 0) return;
+    if (!recentGames || recentGames.length === 0) {
+        document.getElementById('activityFeed').innerHTML = '<p style="color:#8b8b8b; font-size:0.85rem; padding:1rem 0;">No recent activity found — you have not played anything in the last two weeks.</p>';
+        document.getElementById('activitySection').style.display = 'block';
+        return;
+    }
     document.getElementById('activityFeed').innerHTML = recentGames.map(function(g) {
         const twoWeekHours = g.playtime_2weeks ? (g.playtime_2weeks / 60).toFixed(1) : null;
         const totalHours = g.playtime_forever ? (g.playtime_forever / 60).toFixed(1) : 0;
         return '<div class="activity-item">' +
-            '<img class="activity-cover" src="https://cdn.cloudflare.steamstatic.com/steam/apps/' + g.appid + '/header.jpg" alt="' + g.name + '" onerror="this.outerHTML=\'<div class=activity-cover-missing>No Image</div>\'"/>'
+            '<img class="activity-cover" src="https://cdn.cloudflare.steamstatic.com/steam/apps/' + g.appid + '/header.jpg" alt="' + g.name + '" onerror="this.src=\'\'; this.style.background=\'#1b2838\'; this.style.border=\'1px solid #2a4a6b\'; this.style.borderRadius=\'4px\'; this.alt=\'No image available\'; this.title=\'No image available\'"/>' +
             '<div class="activity-info"><div class="activity-name">' + g.name + '</div><div class="activity-meta">' + totalHours + 'h total playtime</div></div>' +
             '<div class="activity-hours">' + (twoWeekHours ? twoWeekHours + 'h' : '—') + '<span>last 2 weeks</span></div>' +
             '</div>';
