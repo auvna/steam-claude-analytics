@@ -11,21 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
     <style>
-        .activity-cover-missing {
-            width: 80px;
-            height: 37px;
-            background: #1b2838;
-            border: 1px solid #2a4a6b;
-            border-radius: 4px;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #555;
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+
         .quiz-card {
             max-width: 1200px;
             margin: 0 auto 1.5rem;
@@ -658,7 +644,7 @@ function renderShowcase(games) {
 
 function renderActivityFeed(recentGames) {
     if (!recentGames || recentGames.length === 0) {
-        document.getElementById('activityFeed').innerHTML = '<p style="color:#8b8b8b; font-size:0.85rem; padding:1rem 0;">No recent activity found — you have not played anything in the last two weeks.</p>';
+        document.getElementById('activityFeed').innerHTML = '<p style="color:#8b8b8b; font-size:0.85rem; padding:1rem 0;">No recent activity found — you haven\'t played anything in the last two weeks.</p>';
         document.getElementById('activitySection').style.display = 'block';
         return;
     }
@@ -666,7 +652,7 @@ function renderActivityFeed(recentGames) {
         const twoWeekHours = g.playtime_2weeks ? (g.playtime_2weeks / 60).toFixed(1) : null;
         const totalHours = g.playtime_forever ? (g.playtime_forever / 60).toFixed(1) : 0;
         return '<div class="activity-item">' +
-            '<img class="activity-cover" src="https://cdn.cloudflare.steamstatic.com/steam/apps/' + g.appid + '/header.jpg" alt="' + g.name + '" onerror="this.src=\'\'; this.style.background=\'#1b2838\'; this.style.border=\'1px solid #2a4a6b\'; this.style.borderRadius=\'4px\'; this.alt=\'No image available\'; this.title=\'No image available\'"/>' +
+            '<img class="activity-cover" src="https://cdn.cloudflare.steamstatic.com/steam/apps/' + g.appid + '/header.jpg" alt="' + g.name + '" onerror="this.src=\'\'; this.style.background=\'#1b2838\'; this.style.border=\'1px solid #2a4a6b\'; this.style.borderRadius=\'4px\'"/>' +
             '<div class="activity-info"><div class="activity-name">' + g.name + '</div><div class="activity-meta">' + totalHours + 'h total playtime</div></div>' +
             '<div class="activity-hours">' + (twoWeekHours ? twoWeekHours + 'h' : '—') + '<span>last 2 weeks</span></div>' +
             '</div>';
