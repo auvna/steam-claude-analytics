@@ -164,9 +164,12 @@ async def library(steam_id: str):
 
 @app.get("/genres/{steam_id}")
 async def genres(steam_id: str):
+    print(f"🎯 Genres endpoint hit for {steam_id}")
     cached = get_cached(CachedGenres, steam_id)
     if cached:
+        print("📦 Returning cached genres")
         return cached
+    print("🔄 Fetching fresh genres from RAWG")
 
     games = await get_owned_games(steam_id)
     if not games:

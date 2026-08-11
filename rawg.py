@@ -20,10 +20,13 @@ async def get_game_genres(game_name: str) -> list:
             data = r.json()
             results = data.get("results", [])
             if not results:
+                print(f"❌ No match: {game_name}")
                 return []
             genres = [g["name"] for g in results[0].get("genres", [])]
+            print(f"✅ {game_name} → {genres}")
             return genres
-        except Exception:
+        except Exception as e:
+            print(f"⚠️ Error for {game_name}: {e}")
             return []
 
 

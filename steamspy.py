@@ -39,7 +39,7 @@ async def get_top_games_by_owners() -> list:
 async def get_hidden_gems() -> list:
     async with httpx.AsyncClient(timeout=10.0) as client:
         try:
-            r = await client.get(BASE, params={"request": "top100in2weeks"})
+            r = await client.get(BASE, params={"request": "top100forever"})
             data = r.json()
             games = []
             for appid, info in data.items():
@@ -54,7 +54,7 @@ async def get_hidden_gems() -> list:
                 if total_reviews < 100:
                     continue
                 ratio = positive / total_reviews if total_reviews > 0 else 0
-                if ratio >= 0.90 and max_owners < 2000000:
+                if ratio >= 0.95 and max_owners < 500000:
                     games.append({
                         "appid": appid,
                         "name": info.get("name", "Unknown"),
